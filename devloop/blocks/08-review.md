@@ -1,9 +1,8 @@
 ---
 block: review
-order: 9
+order: 8
 needs: [cleanup]
 mutates: source, git
-parallel-safe: false
 gate-after: false
 ---
 
@@ -12,7 +11,7 @@ gate-after: false
 **Goal**: Self-review all changes across all touched repos and produce the final verdict.
 
 **Input**: Run `git diff HEAD` in the primary repo and in each dependency repo listed in
-`00-branch.md`. Read `07-quality.md` and `08-cleanup.md` for already-surfaced findings and
+`00-branch.md`. Read `06-quality.md` and `07-cleanup.md` for already-surfaced findings and
 the docs written (don't re-litigate).
 
 **Check each changed file for:**
@@ -23,7 +22,7 @@ the docs written (don't re-litigate).
 4. Dead code or unnecessary abstraction.
 5. Generated-file noise (codegen version bumps, unrelated regen) — flag as LOW.
 
-## Output — `.devloop/<slug>/09-review.md` (present to the user)
+## Output — `.devloop/<slug>/08-review.md` (present to the user)
 
 ```markdown
 ## Changes summary
@@ -47,7 +46,7 @@ Review found N issue(s). Options:
 ```
 If "fix": apply fixes, re-run diffs, re-check. Repeat until CLEAN or the user stops.
 
-Print: `[9/9] REVIEW done`
+Print: `[8/8] REVIEW done`
 
 When CLEAN (or accepted), return to the master file's **Done** section to print the
 completion summary.

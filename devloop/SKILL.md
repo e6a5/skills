@@ -9,16 +9,14 @@ allowed-tools: Read Edit Write Bash Grep LSP AskUserQuestion Agent Skill WebSear
 
 `devloop` runs a development pipeline as a set of **blocks**. Each block is a separate
 file in `blocks/`. A block has one job, reads the artifacts of earlier blocks, and
-writes its own artifact. This master file is the **scheduler**: it decides the order,
-which blocks may run in parallel, and where to stop for user approval.
+writes its own artifact. This master file is the **scheduler**: it decides the order and
+where to stop for user approval.
 
 The design is project-agnostic. Nothing here assumes a language, framework, or RPC
 style — each block detects the project's tooling at runtime.
 
 ```
-                         ┌─→ TEST ─┐
-BRANCH → ARCH → REQ → PLAN ─(gate)→ IMPL ─┤         ├─→ QUALITY → CLEANUP → REVIEW → done
-                         └─→ E2E ──┘
+BRANCH → ARCH → REQ → PLAN ─(gate)→ IMPL → TEST → QUALITY → CLEANUP → REVIEW → done
 ```
 
 - Handoff artifacts live in `.devloop/<slug>/` relative to the **primary repo** (cwd).
@@ -42,8 +40,8 @@ loop *runs*.
    (`N/A — <reason>`) and exits. Never manufacture work to fill a section.
 4. **Right-size the loop.** Match depth to the change — see the Setup triage tiers. A
    typo fix does not need a full architecture map.
-5. **Spend tokens only to buy correctness.** Extra reads, review passes, and forks are
-   for catching real defects, not for thoroughness theater.
+5. **Spend tokens only to buy correctness.** Extra reads and review passes are for
+   catching real defects, not for thoroughness theater.
 
 ---
 
@@ -57,45 +55,35 @@ block: <name>
 order: <n>
 needs: [<block names that must finish first>]
 mutates: none | source | git   # what the block changes
-parallel-safe: true | false    # may run concurrently with other parallel-safe blocks
 gate-after: true | false       # stop for user approval when this block finishes
 ---
 ```
 
-| File | block | needs | mutates | parallel-safe |
-|------|-------|-------|---------|---------------|
-| `blocks/00-branch.md`  | branch  | —              | git    | no  |
-| `blocks/01-arch.md`    | arch    | branch         | none   | no  |
-| `blocks/02-req.md`     | req     | arch           | none   | no  |
-| `blocks/03-plan.md`    | plan    | req            | none   | no (gate-after) |
-| `blocks/04-impl.md`    | impl    | plan           | source, git | no |
-| `blocks/05-test.md`    | test    | impl           | none   | **yes** |
-| `blocks/06-e2e.md`     | e2e     | impl           | none   | **yes** |
-| `blocks/07-quality.md` | quality | test, e2e      | source | no  |
-| `blocks/08-cleanup.md` | cleanup | quality        | source | no  |
-| `blocks/09-review.md`  | review  | cleanup        | source, git | no  |
+| File | block | needs | mutates |
+|------|-------|-------|---------|
+| `blocks/00-branch.md`  | branch  | —              | git    |
+| `blocks/01-arch.md`    | arch    | branch         | none   |
+| `blocks/02-req.md`     | req     | arch           | none   |
+| `blocks/03-plan.md`    | plan    | req            | none (gate-after) |
+| `blocks/04-impl.md`    | impl    | plan           | source, git |
+| `blocks/05-test.md`    | test    | impl           | none   |
+| `blocks/06-quality.md` | quality | test           | source |
+| `blocks/07-cleanup.md` | cleanup | quality        | source |
+| `blocks/08-review.md`  | review  | cleanup        | source, git |
 
 ---
 
 ## Scheduling rules
 
 1. **Run order is a topological sort by `needs`.** A block may start only when every
-   block in its `needs` list has completed.
-2. **Parallel group**: when two or more ready blocks are all `parallel-safe: true` and
-   `mutates: none`, run them concurrently — spawn each as an `Agent` (subagent_type:
-   `fork`) so their tool output stays out of the main context. Wait for all to finish,
-   then collect their artifacts before scheduling the next block.
-   - `test` and `e2e` are the parallel pair: both only read source. Launch both forks
-     in one turn, then proceed once both have written their artifacts.
-3. **Mutating blocks never run in parallel.** `impl`, `quality` (may apply philosophy
-   fixes), `cleanup`, `branch`, and `review` run alone, in order.
-4. **`quality` waits for both `test` and `e2e`** so its independent review sees the
-   final code and can fold in the test/e2e outcomes.
-5. **Gate**: after a block with `gate-after: true` (i.e. `plan`), present the artifact
+   block in its `needs` list has completed. Blocks run one at a time, in order.
+2. **`quality` waits for `test`** so its independent review sees code that already passed
+   tests and can fold in the test outcome.
+3. **Gate**: after a block with `gate-after: true` (i.e. `plan`), present the artifact
    and wait for the user's `go` before scheduling any mutating block.
-6. **Failure loop-back**: if `test`, `e2e`, or `quality` reports a blocking failure and
-   the user chooses `fix`, re-run `impl` with the failure context, then re-run the
-   blocks downstream of `impl` again.
+4. **Failure loop-back**: if `test` or `quality` reports a blocking failure and the user
+   chooses `fix`, re-run `impl` with the failure context, then re-run the blocks
+   downstream of `impl` again.
 
 ## State tracking & resumption
 
@@ -114,14 +102,13 @@ updated: <timestamp>
 - [ ] plan
 - [ ] impl
 - [ ] test
-- [-] e2e       (skipped: quick tier)
 - [ ] quality
 - [ ] cleanup
 - [ ] review
 ```
 
 - `[-]` marks a block skipped by the tier; treat it as satisfied when resolving the
-  `needs` of later blocks (e.g. `quality` proceeds though `e2e` is `[-]`).
+  `needs` of later blocks (e.g. `req` proceeds though `arch` is `[-]`).
 - **After a block completes**, mark its line `[x]` and move the `← next` marker.
 - **On invocation**, if `state.md` already exists for this slug, read it and resume from
   the first unchecked block instead of starting at `branch`. Tell the user:
@@ -150,9 +137,6 @@ branch-prefix: <prefix or "none">
 #   high   — above + security review
 quality-depth: medium
 
-# Optional: default endpoint for generated E2E test scripts
-e2e-addr: localhost:9000
-
 repos:
   <alias>: <absolute-path-to-repo>
 ```
@@ -175,9 +159,9 @@ repos:
    ```
 4. **Triage the request into a tier** (principle 4) and record it in `state.md`:
    - **`quick`** — a localized fix or tweak: no new public surface, no contract/schema/
-     migration change, no cross-repo work. Skip `arch` and `e2e` (mark them `[-]`); fold
-     requirements into a 2–3 line `plan`; force `quality-depth: low` for this run. The
-     plan gate still applies.
+     migration change, no cross-repo work. Skip `arch` (mark it `[-]`); fold requirements
+     into a 2–3 line `plan`; force `quality-depth: low` for this run. The plan gate still
+     applies.
    - **`full`** — new features, cross-repo work, contract/schema/migration changes, or
      anything you can't confidently scope. Run every block at the configured depth.
    - When unsure, pick `full`. State the chosen tier in one line and why.
@@ -207,12 +191,10 @@ Artifacts: .devloop/<slug>/
   02-requirements.md   requirements + acceptance criteria
   03-plan.md           tasks (all checked)
   05-test.md           test results (all repos)
-  06-e2e.md            end-to-end test artifacts
-  e2e-test.sh          generated E2E test script
-  07-quality.md        quality gate summary
-  07-quality-review.md independent review findings (if medium/high)
-  08-cleanup.md        cleanup actions + docs written (location + audience)
-  09-review.md         final review verdict (all repos)
+  06-quality.md        quality gate summary
+  06-quality-review.md independent review findings (if medium/high)
+  07-cleanup.md        cleanup actions + docs written (location + audience)
+  08-review.md         final review verdict (all repos)
 
 <one short paragraph summarising what was built and any notable decisions>
 

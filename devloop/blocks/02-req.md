@@ -3,7 +3,6 @@ block: req
 order: 2
 needs: [arch]
 mutates: none
-parallel-safe: false
 gate-after: false
 ---
 
@@ -37,4 +36,4 @@ gate-after: false
 - [ ] <verifiable criterion>
 ```
 
-Print: `[2/9] REQ done`
+Print: `[2/8] REQ done`

@@ -1,9 +1,8 @@
 ---
 block: cleanup
-order: 8
+order: 7
 needs: [quality]
 mutates: source
-parallel-safe: false
 gate-after: false
 ---
 
@@ -14,7 +13,7 @@ can understand what this task did and how to use anything new it introduced. Run
 `quality` (so it tidies the final, quality-checked code) and before `review` (so `review`
 validates the cleaned, documented state). Mutates source, so it runs alone.
 
-**Input**: Read `00-input.md`, `03-plan.md`, `07-quality.md`, and the final
+**Input**: Read `00-input.md`, `03-plan.md`, `06-quality.md`, and the final
 `git diff HEAD` of the primary repo and each cross-repo branch in `00-branch.md`.
 
 ## Step 8a — Clean up the diff
@@ -51,7 +50,7 @@ terse (principle 2) — link to code rather than pasting it.
 
 Apply the same to each cross-repo branch that exposed something new.
 
-## Output — `.devloop/<slug>/08-cleanup.md`
+## Output — `.devloop/<slug>/07-cleanup.md`
 
 ```markdown
 ## Cleanup
@@ -66,4 +65,4 @@ Apply the same to each cross-repo branch that exposed something new.
 ## Status: DONE
 ```
 
-Print: `[8/9] CLEANUP done`
+Print: `[7/8] CLEANUP done`

@@ -3,7 +3,6 @@ block: impl
 order: 4
 needs: [plan]
 mutates: source, git
-parallel-safe: false
 gate-after: false
 ---
 
@@ -77,4 +76,4 @@ Pulls the dependency repo's output into the primary repo.
 
 ## After all tasks
 
-Print: `[4/9] IMPL done`
+Print: `[4/8] IMPL done`

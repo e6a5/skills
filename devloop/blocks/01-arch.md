@@ -3,7 +3,6 @@ block: arch
 order: 1
 needs: [branch]
 mutates: none
-parallel-safe: false
 gate-after: false
 ---
 
@@ -41,4 +40,4 @@ gate-after: false
 - <what this request does NOT touch>
 ```
 
-Print: `[1/9] ARCH done`
+Print: `[1/8] ARCH done`

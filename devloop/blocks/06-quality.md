@@ -1,9 +1,8 @@
 ---
 block: quality
-order: 7
-needs: [test, e2e]
+order: 6
+needs: [test]
 mutates: source
-parallel-safe: false
 gate-after: false
 ---
 
@@ -11,11 +10,10 @@ gate-after: false
 
 **Goal**: Verify the output with checks the implementing agent cannot run on itself —
 independent review, philosophy compliance, and breaking-change detection. Runs after
-`test` and `e2e` so it sees the final code and their outcomes. May apply fixes, so it
-runs alone (not in the parallel group).
+`test` so it sees the final code and the test outcome. May apply fixes, so it runs alone.
 
 **Input**: Read `quality-depth` from `.devloop/config.md` (default `medium`). Read
-`00-branch.md`, `05-test.md`, `06-e2e.md`. Run all checks for the configured depth even
+`00-branch.md` and `05-test.md`. Run all checks for the configured depth even
 if one finds issues.
 
 ## Q1 — Philosophy compliance (all depths)
@@ -40,21 +38,21 @@ impl), or `stop`.
 
 Invoke `/code-review medium` on the current diff. This spawns a **fresh agent** with no
 memory of the implementation — it reads only the diff and the codebase, so its findings
-are independent. Write findings to `.devloop/<slug>/07-quality-review.md`. For each
+are independent. Write findings to `.devloop/<slug>/06-quality-review.md`. For each
 CRITICAL/HIGH finding ask: fix now, defer to review, or skip.
 
 ## Q4 — Security review (depth: high only)
 
-Invoke `/security-review` on the branch. Append findings to `07-quality-review.md`. Any
+Invoke `/security-review` on the branch. Append findings to `06-quality-review.md`. Any
 security finding blocks proceeding until the user makes an explicit choice.
 
-## Output — `.devloop/<slug>/07-quality.md`
+## Output — `.devloop/<slug>/06-quality.md`
 
 ```markdown
 ## Quality gate results
 ### Q1 — Philosophy: CLEAN | N violations fixed
 ### Q2 — Contract breaking: N/A | CLEAN | N violations (accepted/fixed)
-### Q3 — Code review: CLEAN | N findings (see 07-quality-review.md)
+### Q3 — Code review: CLEAN | N findings (see 06-quality-review.md)
 ### Q4 — Security: N/A | CLEAN | N findings
 
 ## Overall: PASS | PASS-WITH-NOTES | BLOCKED
@@ -62,4 +60,4 @@ security finding blocks proceeding until the user makes an explicit choice.
 
 If `BLOCKED` (unfixed CRITICAL): do not proceed to `review` until resolved.
 
-Print: `[7/9] QUALITY done`
+Print: `[6/8] QUALITY done`

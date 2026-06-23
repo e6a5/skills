@@ -3,7 +3,6 @@ block: plan
 order: 3
 needs: [req]
 mutates: none
-parallel-safe: false
 gate-after: true
 ---
 
@@ -38,7 +37,7 @@ become explicit tasks, ordered before the tasks that depend on them.
 - <alias>: <absolute path or "unknown — will ask">
 ```
 
-Print: `[3/9] PLAN done`
+Print: `[3/8] PLAN done`
 
 ---
 

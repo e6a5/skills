@@ -3,7 +3,6 @@ block: branch
 order: 0
 needs: []
 mutates: git
-parallel-safe: false
 gate-after: false
 ---
 
@@ -59,4 +58,4 @@ status: new | resumed
 (filled in as cross-repo tasks execute)
 ```
 
-Print: `[0/9] BRANCH done — on <branch-name> (from <base-branch>)`
+Print: `[0/8] BRANCH done — on <branch-name> (from <base-branch>)`
