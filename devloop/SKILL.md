@@ -84,6 +84,20 @@ gate-after: true | false       # stop for user approval when this block finishes
 4. **Failure loop-back**: if `test` or `quality` reports a blocking failure and the user
    chooses `fix`, re-run `impl` with the failure context, then re-run the blocks
    downstream of `impl` again.
+5. **Stuck detection**: before starting any block, check its `attempts` count in
+   `state.md`. If `attempts ≥ 2` and the block is still `[ ]` (not completed), the
+   scheduler is likely in a repeat loop. Stop and use **AskUserQuestion** to present:
+
+   > "Stuck on `<block>` (attempted <n> times without completing). What next?"
+   > - **Retry with context summary** — write a brief summary of completed blocks and
+   >   their key outputs, inject it as a preamble into this block's execution, then retry.
+   > - **Skip this block** — mark it `[-]` and continue to the next block.
+   > - **Abort** — stop the loop; print the `── devloop complete ──` footer with a
+   >   note that `<block>` was abandoned.
+
+   On "retry with context summary": read `state.md` and the artifacts of all `[x]`
+   blocks, write a ≤10-bullet summary to `.devloop/<slug>/context-summary.md`, then
+   start the block with that summary prepended to its instructions.
 
 ## State tracking & resumption
 
@@ -96,15 +110,15 @@ slug: <slug>
 tier: quick | full
 updated: <timestamp>
 
-- [x] branch
-- [-] arch      (skipped: quick tier)
-- [ ] req      ← next
-- [ ] plan
-- [ ] impl
-- [ ] test
-- [ ] quality
-- [ ] cleanup
-- [ ] review
+- [x] branch        attempts:1
+- [-] arch          attempts:0  (skipped: quick tier)
+- [ ] req      ← next attempts:0
+- [ ] plan          attempts:0
+- [ ] impl          attempts:0
+- [ ] test          attempts:0
+- [ ] quality       attempts:0
+- [ ] cleanup       attempts:0
+- [ ] review        attempts:0
 ```
 
 - `[-]` marks a block skipped by the tier; treat it as satisfied when resolving the
@@ -115,6 +129,9 @@ updated: <timestamp>
   `resuming <slug> at <block>`.
 - **On failure loop-back** (rule 6), reset `impl` and every block after it to `[ ]`, then
   re-schedule from `impl`.
+- **Attempt tracking**: increment `attempts:<n>` for a block each time it is started
+  (before reading its block file). On failure loop-back, do NOT reset attempt counts —
+  they accumulate across retries.
 
 To run a block: **Read `blocks/<file>.md` and follow it exactly.** The block file is the
 source of truth for its own steps and output format.
@@ -150,6 +167,11 @@ repos:
 
 1. If `$ARGUMENTS` is empty, use **AskUserQuestion** to ask *"What do you want to build
    or fix?"* Wait for the answer.
+   - **Right loop?** devloop builds or changes behavior. If the input is really a *defect
+     in existing behavior* — something that worked or was meant to work now does the wrong
+     thing ("X is broken", "Y crashes", "returns the wrong value") — say so in one line and
+     suggest `/bugfix` (reproduce → root-cause → red→green fix). Proceed with devloop only
+     if the user confirms, or if the work is large enough to warrant the full loop.
 2. Derive a kebab-case slug from the input (max 40 chars, e.g. `"add JWT refresh"` →
    `add-jwt-refresh`).
 3. `mkdir -p .devloop/<slug>` and write `.devloop/<slug>/00-input.md`:

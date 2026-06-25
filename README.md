@@ -10,6 +10,7 @@ Type `/` to invoke. Built on one [coding philosophy](https://github.com/e6a5/age
 
 ```bash
 /devloop add user authentication   # plan → implement → test → review
+/bugfix JWT refresh crashes         # reproduce → investigate → fix → verify
 /philo fix                         # review and fix code against the philosophy
 /clarify add user authentication   # surface key questions before any work begins
 /learn                             # save lessons from the current session
@@ -22,6 +23,7 @@ Type `/` to invoke. Built on one [coding philosophy](https://github.com/e6a5/age
 | Skill | What it does | Usage |
 |-------|--------------|-------|
 | **devloop** | Full dev loop: plan → implement → test → quality → review. Handles cross-repo work. | `/devloop <what to build>` |
+| **bugfix** | Bug fix loop: reproduce → investigate (reads devloop artifacts for context) → plan → fix → verify → review. | `/bugfix <describe the bug>` |
 | **philo** | Review code against the coding philosophy. Pass `fix` to apply fixes interactively. | `/philo [fix] [path]` |
 | **clarify** | Surface the 2–3 key questions before any work begins. | `/clarify <request>` |
 | **learn** | Save and recall non-obvious lessons across sessions. | `/learn` · `/learn recall <topic>` |
@@ -34,7 +36,7 @@ A skill is a folder with a `SKILL.md`. Claude Code loads them from `~/.claude/sk
 
 ```bash
 # run from this directory
-cp -R devloop philo clarify learn ~/.claude/skills/
+cp -R devloop bugfix philo clarify learn ~/.claude/skills/
 ```
 
 Restart Claude Code, then type `/` to see them. Works in the CLI, desktop app, and IDE extensions.
@@ -48,6 +50,7 @@ Track this repo in git, then symlink on each machine:
 ```bash
 git clone <your-repo-url> ~/skills
 ln -sfn ~/skills/devloop  ~/.claude/skills/devloop
+ln -sfn ~/skills/bugfix   ~/.claude/skills/bugfix
 ln -sfn ~/skills/philo    ~/.claude/skills/philo
 ln -sfn ~/skills/clarify  ~/.claude/skills/clarify
 ln -sfn ~/skills/learn    ~/.claude/skills/learn
@@ -60,5 +63,5 @@ Run `git pull` to update everywhere.
 ## Uninstall
 
 ```bash
-rm -rf ~/.claude/skills/devloop ~/.claude/skills/philo ~/.claude/skills/clarify ~/.claude/skills/learn
+rm -rf ~/.claude/skills/devloop ~/.claude/skills/bugfix ~/.claude/skills/philo ~/.claude/skills/clarify ~/.claude/skills/learn
 ```
