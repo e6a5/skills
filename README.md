@@ -1,32 +1,49 @@
 # Claude Skills
 
-[Claude Code](https://claude.com/claude-code) skills built on one
-[coding philosophy](https://github.com/e6a5/agents/blob/main/AGENTS.md): do one thing well,
-favor simplicity, write for the next reader.
+> **Slash commands that extend Claude Code**
 
-| Skill | What it does | Invoke |
-|-------|--------------|--------|
-| **devloop** | Full dev loop: branch → plan (gate) → implement → test → quality → cleanup & docs → review. Handles cross-repo work. | `/devloop <what to build>` |
-| **philo** | Review code against the philosophy. Add `fix` for a guided fix loop. | `/philo [fix] [path]` |
-| **clarify** | Ask the 2–3 most important questions about a request before any work begins. Called automatically by devloop; also usable standalone. | `/clarify <request>` |
-| **learn** | Claude's institutional memory. Saves non-obvious lessons after completing work; recalls relevant past experience before planning. Called automatically by devloop. | `/learn` · `/learn recall <description>` |
+Type `/` to invoke. Built on one [coding philosophy](https://github.com/e6a5/agents/blob/main/AGENTS.md): do one thing well, favor simplicity, write for the next reader.
+
+---
+
+## Quick Start
+
+```bash
+/devloop add user authentication   # plan → implement → test → review
+/philo fix                         # review and fix code against the philosophy
+/clarify add user authentication   # surface key questions before any work begins
+/learn                             # save lessons from the current session
+```
+
+---
+
+## Skills
+
+| Skill | What it does | Usage |
+|-------|--------------|-------|
+| **devloop** | Full dev loop: plan → implement → test → quality → review. Handles cross-repo work. | `/devloop <what to build>` |
+| **philo** | Review code against the coding philosophy. Pass `fix` to apply fixes interactively. | `/philo [fix] [path]` |
+| **clarify** | Surface the 2–3 key questions before any work begins. | `/clarify <request>` |
+| **learn** | Save and recall non-obvious lessons across sessions. | `/learn` · `/learn recall <topic>` |
+
+---
 
 ## Install
 
-A skill is a folder with a `SKILL.md`. Claude Code loads them from `~/.claude/skills/`
-(personal, all projects) or `<repo>/.claude/skills/` (per project). No build step.
+A skill is a folder with a `SKILL.md`. Claude Code loads them from `~/.claude/skills/` (all projects) or `<repo>/.claude/skills/` (one project). No build step.
 
 ```bash
-# from this directory
+# run from this directory
 cp -R devloop philo clarify learn ~/.claude/skills/
 ```
 
-Restart Claude Code and type `/` to see them. Works in the CLI, desktop app, and IDE
-extensions.
+Restart Claude Code, then type `/` to see them. Works in the CLI, desktop app, and IDE extensions.
 
-## Across devices
+---
 
-Track this folder in git, then on each machine:
+## Sync across devices
+
+Track this repo in git, then symlink on each machine:
 
 ```bash
 git clone <your-repo-url> ~/skills
@@ -36,7 +53,9 @@ ln -sfn ~/skills/clarify  ~/.claude/skills/clarify
 ln -sfn ~/skills/learn    ~/.claude/skills/learn
 ```
 
-`git pull` to update everywhere.
+Run `git pull` to update everywhere.
+
+---
 
 ## Uninstall
 
