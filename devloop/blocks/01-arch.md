@@ -10,6 +10,9 @@ gate-after: false
 
 **Goal**: Map every area this request will touch — including dependencies in other repos.
 
+**Before reading the codebase**, run `/learn recall <input>` to surface any relevant past
+experience. If it returns lessons, include them in the output under `## Past experience`.
+
 **Do:**
 - Read `CLAUDE.md`/`AGENTS.md`, key config and entry-point files, and the top-level
   directory structure.
@@ -38,6 +41,9 @@ gate-after: false
 
 ## Out of scope
 - <what this request does NOT touch>
+
+## Past experience
+- (from /learn recall — omit section if NO RELEVANT PAST EXPERIENCE)
 ```
 
 Print: `[1/8] ARCH done`

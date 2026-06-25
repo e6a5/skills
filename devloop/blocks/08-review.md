@@ -10,8 +10,7 @@ gate-after: false
 
 **Goal**: Self-review all changes across all touched repos and produce the final verdict.
 
-**Input**: Run `git diff HEAD` in the primary repo and in each dependency repo listed in
-`00-branch.md`. Read `06-quality.md` and `07-cleanup.md` for already-surfaced findings and
+**Input**: Read `base-branch` from `00-branch.md`. Run `git diff <base-branch>...HEAD` in the primary repo and in each dependency repo listed in `00-branch.md`. Read `06-quality.md` and `07-cleanup.md` for already-surfaced findings and
 the docs written (don't re-litigate).
 
 **Check each changed file for:**

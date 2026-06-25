@@ -157,7 +157,11 @@ repos:
    # Input
    <the user's original request verbatim>
    ```
-4. **Triage the request into a tier** (principle 4) and record it in `state.md`:
+4. **Clarify (fresh runs only)**: if `.devloop/<slug>/state.md` does not yet exist, run
+   `/clarify` with the input. It asks at most 3 questions and appends a
+   `## Clarifications` section to `00-input.md`. On resume, skip — clarifications are
+   already in `00-input.md` from the first run.
+5. **Triage the request into a tier** (principle 4) and record it in `state.md`:
    - **`quick`** — a localized fix or tweak: no new public surface, no contract/schema/
      migration change, no cross-repo work. Skip `arch` (mark it `[-]`); fold requirements
      into a 2–3 line `plan`; force `quality-depth: low` for this run. The plan gate still
@@ -165,10 +169,10 @@ repos:
    - **`full`** — new features, cross-repo work, contract/schema/migration changes, or
      anything you can't confidently scope. Run every block at the configured depth.
    - When unsure, pick `full`. State the chosen tier in one line and why.
-5. If `.devloop/<slug>/state.md` already exists, resume per **State tracking** above.
+6. If `.devloop/<slug>/state.md` already exists, resume per **State tracking** above.
    Otherwise create it with every block unchecked (mark tier-skipped blocks `[-]`).
-6. Print: `── devloop: <slug> (<tier>) ──`
-7. Begin scheduling from the first unchecked block (`branch` on a fresh run).
+7. Print: `── devloop: <slug> (<tier>) ──`
+8. Begin scheduling from the first unchecked block (`branch` on a fresh run).
 
 ---
 
@@ -202,3 +206,5 @@ Next:
   1. Open PR: <feature-branch> → <base-branch> in primary repo
   2. Open PR for each dependency repo (merge those first so the primary PR builds)
 ```
+
+Then run `/learn` to capture any non-obvious lessons from this run.

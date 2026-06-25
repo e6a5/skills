@@ -34,14 +34,7 @@ buf breaking --against '.git#branch=<base-branch>'      # proto
 On violations, present them and ask: `accept` (note in review), `fix` (loop back to
 impl), or `stop`.
 
-## Q3 — Independent code review (depth: medium | high)
-
-Invoke `/code-review medium` on the current diff. This spawns a **fresh agent** with no
-memory of the implementation — it reads only the diff and the codebase, so its findings
-are independent. Write findings to `.devloop/<slug>/06-quality-review.md`. For each
-CRITICAL/HIGH finding ask: fix now, defer to review, or skip.
-
-## Q4 — Security review (depth: high only)
+## Q3 — Security review (depth: high only)
 
 Invoke `/security-review` on the branch. Append findings to `06-quality-review.md`. Any
 security finding blocks proceeding until the user makes an explicit choice.
@@ -52,8 +45,7 @@ security finding blocks proceeding until the user makes an explicit choice.
 ## Quality gate results
 ### Q1 — Philosophy: CLEAN | N violations fixed
 ### Q2 — Contract breaking: N/A | CLEAN | N violations (accepted/fixed)
-### Q3 — Code review: CLEAN | N findings (see 06-quality-review.md)
-### Q4 — Security: N/A | CLEAN | N findings
+### Q3 — Security: N/A | CLEAN | N findings
 
 ## Overall: PASS | PASS-WITH-NOTES | BLOCKED
 ```
@@ -61,3 +53,4 @@ security finding blocks proceeding until the user makes an explicit choice.
 If `BLOCKED` (unfixed CRITICAL): do not proceed to `review` until resolved.
 
 Print: `[6/8] QUALITY done`
+
