@@ -9,6 +9,7 @@ Type `/` to invoke. Built on one [coding philosophy](https://github.com/e6a5/age
 ## Quick Start
 
 ```bash
+/ideate tools for indie game devs  # diverge → converge → sharpen → pick a direction
 /devloop add user authentication   # plan → implement → test → review
 /bugfix JWT refresh crashes         # reproduce → investigate → fix → verify
 /philo fix                         # review and fix code against the philosophy
@@ -22,6 +23,7 @@ Type `/` to invoke. Built on one [coding philosophy](https://github.com/e6a5/age
 
 | Skill | What it does | Usage |
 |-------|--------------|-------|
+| **ideate** | Fuzzy front end before building: diverge → converge → sharpen → pick one direction with its riskiest assumption and cheapest test. Hands off to devloop. | `/ideate <problem, domain, or rough idea>` |
 | **devloop** | Full dev loop: plan → implement → test → quality → review. Handles cross-repo work. | `/devloop <what to build>` |
 | **bugfix** | Bug fix loop: reproduce → investigate (reads devloop artifacts for context) → plan → fix → verify → review. | `/bugfix <describe the bug>` |
 | **philo** | Review code against the coding philosophy. Pass `fix` to apply fixes interactively. | `/philo [fix] [path]` |
@@ -30,7 +32,7 @@ Type `/` to invoke. Built on one [coding philosophy](https://github.com/e6a5/age
 
 ---
 
-> **Dependency:** `devloop` and `bugfix` call `/clarify` (setup) and `/learn` (recall + save). Install all five together — the commands below do — or those steps will be skipped/fail.
+> **Dependency:** `devloop` and `bugfix` call `/clarify` (setup) and `/learn` (recall + save); `ideate` hands off to `/devloop` and calls `/learn`. Install them all together — the commands below do — or those steps will be skipped/fail.
 
 ## Install & sync
 
@@ -52,5 +54,5 @@ Copies, not symlinks: Claude Code's skill discovery doesn't reliably follow syml
 ## Uninstall
 
 ```bash
-rm -rf ~/.claude/skills/devloop ~/.claude/skills/bugfix ~/.claude/skills/philo ~/.claude/skills/clarify ~/.claude/skills/learn
+rm -rf ~/.claude/skills/ideate ~/.claude/skills/devloop ~/.claude/skills/bugfix ~/.claude/skills/philo ~/.claude/skills/clarify ~/.claude/skills/learn
 ```
