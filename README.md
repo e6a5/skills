@@ -30,33 +30,22 @@ Type `/` to invoke. Built on one [coding philosophy](https://github.com/e6a5/age
 
 ---
 
-## Install
+> **Dependency:** `devloop` and `bugfix` call `/clarify` (setup) and `/learn` (recall + save). Install all five together — the commands below do — or those steps will be skipped/fail.
+
+## Install & sync
 
 A skill is a folder with a `SKILL.md`. Claude Code loads them from `~/.claude/skills/` (all projects) or `<repo>/.claude/skills/` (one project). No build step.
 
-```bash
-# run from this directory
-cp -R devloop bugfix philo clarify learn ~/.claude/skills/
-```
-
-Restart Claude Code, then type `/` to see them. Works in the CLI, desktop app, and IDE extensions.
-
----
-
-## Sync across devices
-
-Track this repo in git, then symlink on each machine:
+Use **`sync.sh`** — it pulls the latest commits, then copies every skill folder into `~/.claude/skills/`:
 
 ```bash
-git clone <your-repo-url> ~/skills
-ln -sfn ~/skills/devloop  ~/.claude/skills/devloop
-ln -sfn ~/skills/bugfix   ~/.claude/skills/bugfix
-ln -sfn ~/skills/philo    ~/.claude/skills/philo
-ln -sfn ~/skills/clarify  ~/.claude/skills/clarify
-ln -sfn ~/skills/learn    ~/.claude/skills/learn
+git clone <your-repo-url> ~/skills && cd ~/skills
+./sync.sh        # pull latest, then copy all skills
 ```
 
-Run `git pull` to update everywhere.
+Re-run `./sync.sh` any time to pick up updates (set `CLAUDE_SKILLS_DIR` to install elsewhere). Then restart Claude Code and type `/` to see the skills. Works in the CLI, desktop app, and IDE extensions.
+
+Copies, not symlinks: Claude Code's skill discovery doesn't reliably follow symlinked directories. Each skill is mirrored into its own subfolder, so your other skills are never touched. (Deleting a skill from the repo won't auto-uninstall it — `rm -rf ~/.claude/skills/<name>` to remove.)
 
 ---
 

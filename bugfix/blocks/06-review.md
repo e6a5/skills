@@ -2,7 +2,7 @@
 block: review
 order: 6
 needs: [verify]
-mutates: source, git
+mutates: source
 gate-after: false
 ---
 
@@ -11,9 +11,12 @@ gate-after: false
 **Goal**: Run an independent quality pass, then self-review the fix diff and produce the
 final verdict.
 
-**Input**: Read `base-branch` from `00-branch.md`. Run:
+**Input**: Read `base-branch` from `00-branch.md`. The pipeline does not commit, so the
+fix lives in the working tree — diff it against the base (two-dot), registering
+intent-to-add first so any new file (e.g. the regression test) appears:
 ```bash
-git diff <base-branch>...HEAD
+git add -N .              # make untracked new files visible in the diff
+git diff <base-branch>    # working tree vs base (NOT ...HEAD — HEAD has no commits yet)
 ```
 Read `02-investigate.md` (root cause) and `03-plan.md` (fix plan).
 

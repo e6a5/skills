@@ -64,12 +64,12 @@ gate-after: true | false       # stop for user approval when this block finishes
 | `blocks/00-branch.md`  | branch  | —              | git    |
 | `blocks/01-arch.md`    | arch    | branch         | none   |
 | `blocks/02-req.md`     | req     | arch           | none   |
-| `blocks/03-plan.md`    | plan    | req            | none (gate-after) |
-| `blocks/04-impl.md`    | impl    | plan           | source, git |
+| `blocks/03-plan.md`    | plan    | req            | none   |
+| `blocks/04-impl.md`    | impl    | plan           | source |
 | `blocks/05-test.md`    | test    | impl           | none   |
 | `blocks/06-quality.md` | quality | test           | source |
 | `blocks/07-cleanup.md` | cleanup | quality        | source |
-| `blocks/08-review.md`  | review  | cleanup        | source, git |
+| `blocks/08-review.md`  | review  | cleanup        | source |
 
 ---
 
@@ -127,7 +127,7 @@ updated: <timestamp>
 - **On invocation**, if `state.md` already exists for this slug, read it and resume from
   the first unchecked block instead of starting at `branch`. Tell the user:
   `resuming <slug> at <block>`.
-- **On failure loop-back** (rule 6), reset `impl` and every block after it to `[ ]`, then
+- **On failure loop-back** (rule 4), reset `impl` and every block after it to `[ ]`, then
   re-schedule from `impl`.
 - **Attempt tracking**: increment `attempts:<n>` for a block each time it is started
   (before reading its block file). On failure loop-back, do NOT reset attempt counts —

@@ -2,7 +2,7 @@
 block: fix
 order: 4
 needs: [plan]
-mutates: source, git
+mutates: source
 gate-after: false
 ---
 

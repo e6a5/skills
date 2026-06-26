@@ -52,5 +52,5 @@ security finding blocks proceeding until the user makes an explicit choice.
 
 If `BLOCKED` (unfixed CRITICAL): do not proceed to `review` until resolved.
 
-Print: `[6/8] QUALITY done`
+Print: `[7/9] QUALITY done`
 

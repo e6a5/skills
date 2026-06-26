@@ -58,4 +58,4 @@ status: new | resumed
 (filled in as cross-repo tasks execute)
 ```
 
-Print: `[0/8] BRANCH done — on <branch-name> (from <base-branch>)`
+Print: `[1/9] BRANCH done — on <branch-name> (from <base-branch>)`

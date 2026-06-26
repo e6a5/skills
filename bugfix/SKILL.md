@@ -43,9 +43,9 @@ All devloop operating principles apply, plus:
 | `blocks/01-repro.md` | repro | branch | none |
 | `blocks/02-investigate.md` | investigate | repro | none |
 | `blocks/03-plan.md` | plan | investigate | none (gate-after) |
-| `blocks/04-fix.md` | fix | plan | source, git |
+| `blocks/04-fix.md` | fix | plan | source |
 | `blocks/05-verify.md` | verify | fix | none |
-| `blocks/06-review.md` | review | verify | source, git |
+| `blocks/06-review.md` | review | verify | source |
 
 ---
 

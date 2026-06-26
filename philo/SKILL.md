@@ -34,16 +34,20 @@ Collect the code to inspect:
 ARGS="${ARGUMENTS}"; FIRST="${ARGS%% *}"
 [ "$FIRST" = "fix" ] && ARGS="${ARGS#fix}" && ARGS="${ARGS# }"
 TARGET="$ARGS"
+# `git add -N` registers intent-to-add so untracked NEW files show up in `git diff`
+# (without it, a change made entirely of new files produces an empty diff). It only
+# touches the index, not the working tree — no source is edited.
 if [ -n "$TARGET" ] && [ -f "$TARGET" ]; then
   echo "=== File: $TARGET ===" && cat "$TARGET"
 elif [ -n "$TARGET" ] && [ -e "$TARGET/.git" ]; then
-  echo "=== $TARGET (git diff HEAD) ===" && (cd "$TARGET" && git diff HEAD 2>/dev/null)
+  echo "=== $TARGET (uncommitted: git diff HEAD + untracked) ===" && (cd "$TARGET" && git add -N . >/dev/null 2>&1; git diff HEAD 2>/dev/null)
 elif git rev-parse --git-dir >/dev/null 2>&1; then
-  echo "=== $(pwd) (git diff HEAD) ===" && git diff HEAD 2>/dev/null
+  git add -N . >/dev/null 2>&1
+  echo "=== $(pwd) (uncommitted: git diff HEAD + untracked) ===" && git diff HEAD 2>/dev/null
 else
   for d in */; do
     [ -e "$d/.git" ] || continue
-    diff=$(cd "$d" && git diff HEAD 2>/dev/null)
+    diff=$(cd "$d" && git add -N . >/dev/null 2>&1; git diff HEAD 2>/dev/null)
     [ -n "$diff" ] && echo "=== REPO: $d ===" && echo "$diff"
   done
 fi

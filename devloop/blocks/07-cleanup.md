@@ -65,4 +65,4 @@ Apply the same to each cross-repo branch that exposed something new.
 ## Status: DONE
 ```
 
-Print: `[7/8] CLEANUP done`
+Print: `[8/9] CLEANUP done`

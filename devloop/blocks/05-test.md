@@ -46,4 +46,4 @@ cross-repo branches.
 On `FAIL`, the scheduler will surface the failure and offer: `fix` (loop back to impl),
 `skip`, or `stop`.
 
-Print: `[5/8] TEST done`
+Print: `[6/9] TEST done`

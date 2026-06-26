@@ -36,4 +36,4 @@ gate-after: false
 - [ ] <verifiable criterion>
 ```
 
-Print: `[2/8] REQ done`
+Print: `[3/9] REQ done`

@@ -37,7 +37,7 @@ become explicit tasks, ordered before the tasks that depend on them.
 - <alias>: <absolute path or "unknown — will ask">
 ```
 
-Print: `[3/8] PLAN done`
+Print: `[4/9] PLAN done`
 
 ---
 

@@ -56,7 +56,12 @@ Not worth saving:
 
 Derive a slug from the work (e.g. `add-jwt-refresh`, `rate-limit-middleware`).
 
-Write `~/.claude/learned/YYYY-MM-DD-<slug>.md`:
+The entry path is `~/.claude/learned/YYYY-MM-DD-<slug>.md`. If that file already exists
+(same slug saved earlier the same day), append a numeric suffix — `-2`, `-3`, … — so an
+existing lesson is never silently overwritten. Use the resulting unique path everywhere
+below.
+
+Write the entry:
 
 ```markdown
 ---

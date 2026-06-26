@@ -46,4 +46,4 @@ experience. If it returns lessons, include them in the output under `## Past exp
 - (from /learn recall — omit section if NO RELEVANT PAST EXPERIENCE)
 ```
 
-Print: `[1/8] ARCH done`
+Print: `[2/9] ARCH done`

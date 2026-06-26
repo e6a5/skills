@@ -2,7 +2,7 @@
 block: review
 order: 8
 needs: [cleanup]
-mutates: source, git
+mutates: source
 gate-after: false
 ---
 
@@ -10,8 +10,16 @@ gate-after: false
 
 **Goal**: Self-review all changes across all touched repos and produce the final verdict.
 
-**Input**: Read `base-branch` from `00-branch.md`. Run `git diff <base-branch>...HEAD` in the primary repo and in each dependency repo listed in `00-branch.md`. Read `06-quality.md` and `07-cleanup.md` for already-surfaced findings and
-the docs written (don't re-litigate).
+**Input**: Read `base-branch` from `00-branch.md`. The pipeline does not commit, so the
+change lives in the working tree — diff it against the base (two-dot), registering
+intent-to-add first so new untracked files appear:
+```bash
+git add -N .              # make untracked new files visible in the diff
+git diff <base-branch>    # working tree vs base (NOT ...HEAD — HEAD has no commits yet)
+```
+Run this in the primary repo and in each dependency repo listed in `00-branch.md`. Read
+`06-quality.md` and `07-cleanup.md` for already-surfaced findings and the docs written
+(don't re-litigate).
 
 **Check each changed file for:**
 1. Every change maps to a planned task (no scope creep).
@@ -45,7 +53,7 @@ Review found N issue(s). Options:
 ```
 If "fix": apply fixes, re-run diffs, re-check. Repeat until CLEAN or the user stops.
 
-Print: `[8/8] REVIEW done`
+Print: `[9/9] REVIEW done`
 
 When CLEAN (or accepted), return to the master file's **Done** section to print the
 completion summary.
