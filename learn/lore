@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+#
+# lore — token-efficient recall over your AI knowledge store (~/.claude/learned).
+#
+# Reads INDEX.md first (the cheap layer), ranks entries lexically against a query,
+# and prints only the top-K matches: index line + path + best snippet. The caller
+# (you, or Claude running /learn) then opens only what's relevant — that's the
+# token saving. Read-only: never writes to the store.
+
+set -euo pipefail
+
+LEARNED_DIR="${LORE_LEARNED_DIR:-$HOME/.claude/learned}"
+INDEX="$LEARNED_DIR/INDEX.md"
+
+usage() {
+  cat <<'EOF'
+lore — token-efficient recall over your AI knowledge store.
+
+Usage:
+  lore recall <query...> [-n K]   Rank learned/ entries; print top-K (default 3).
+  lore stat                       Show store footprint (entries, bytes, ~tokens).
+  lore help                       Show this help.
+
+Env:
+  LORE_LEARNED_DIR   Store directory (default: ~/.claude/learned).
+
+Ranking: per query term, +4 if it appears in the entry's INDEX line, +1 if it
+appears in the entry body. Entries are matched index-first, so a tight index
+keeps recall cheap.
+EOF
+}
+
+# has_rg: true if ripgrep is available (preferred over grep).
+if command -v rg >/dev/null 2>&1; then HAS_RG=1; else HAS_RG=0; fi
+
+# term_in_file TERM FILE  -> exit 0 if TERM occurs in FILE (case-insensitive).
+term_in_file() {
+  [ -f "$2" ] || return 1
+  if [ "$HAS_RG" -eq 1 ]; then rg -qiF -- "$1" "$2"; else grep -qiF -- "$1" "$2"; fi
+}
+
+# entry_payload FILE  -> the actionable lines of an entry: the `## Lessons` and
+# `## Watch out for` bullets, with YAML frontmatter, headings, and boilerplate
+# (`## What was done`) dropped. This is the self-sufficient context the model needs,
+# so it rarely has to open the full file. Falls back to the first few body lines for
+# free-form entries that lack those sections.
+entry_payload() {
+  [ -f "$1" ] || return 0
+  local out
+  out=$(awk '
+    NR==1 && $0=="---"{fm=1; next}        # enter frontmatter
+    fm && $0=="---"{fm=0; next}           # leave frontmatter
+    fm{next}                              # skip frontmatter body
+    /^#+ /{ sec = ($0 ~ /^#+ (Lessons|Watch out for)/) ? 1 : 0; next }
+    sec && NF { print }
+  ' "$1")
+  if [ -z "$out" ]; then                  # free-form entry: first 3 content lines
+    out=$(awk '
+      NR==1 && $0=="---"{fm=1; next}
+      fm && $0=="---"{fm=0; next}
+      fm{next}
+      /^#+ /{next}
+      NF{ print; if (++n >= 3) exit }
+    ' "$1")
+  fi
+  printf '%s\n' "$out"
+}
+
+cmd_recall() {
+  local k=3
+  local terms=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -n)   k="${2:-3}"; shift 2 ;;
+      -n*)  k="${1#-n}"; shift ;;
+      *)    terms+=("$1"); shift ;;
+    esac
+  done
+  if [ "${#terms[@]}" -eq 0 ]; then
+    echo "usage: lore recall <query...> [-n K]" >&2
+    return 2
+  fi
+
+  if [ ! -s "$INDEX" ]; then
+    echo "NO ENTRIES"
+    return 0
+  fi
+
+  # Score every entry listed in the index. Output: "score<TAB>date<TAB>slug<TAB>indexline".
+  local scored=""
+  local line date slug file score t
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      "- "*"|"*) ;;      # entry line: "- DATE | slug | [tags] | summary"
+      *) continue ;;
+    esac
+    date=$(printf '%s\n' "$line" | sed -E 's/^- *([0-9]{4}-[0-9]{2}-[0-9]{2}).*/\1/')
+    slug=$(printf '%s\n' "$line" | awk -F'|' '{gsub(/^[ \t]+|[ \t]+$/,"",$2); print $2}')
+    [ -n "$slug" ] || continue
+    file="$LEARNED_DIR/$date-$slug.md"
+    score=0
+    for t in "${terms[@]}"; do
+      if printf '%s\n' "$line" | grep -qiF -- "$t"; then score=$((score + 4)); fi
+      if term_in_file "$t" "$file"; then score=$((score + 1)); fi
+    done
+    [ "$score" -gt 0 ] || continue
+    scored+="$score	$date	$slug	$line
+"
+  done < "$INDEX"
+
+  if [ -z "$scored" ]; then
+    echo "NO RELEVANT ENTRIES"
+    return 0
+  fi
+
+  echo "── lore recall: ${terms[*]} ──"
+  printf '%s' "$scored" | sort -t'	' -k1,1nr | head -n "$k" | while IFS='	' read -r score date slug line; do
+    file="$LEARNED_DIR/$date-$slug.md"
+    echo "$line"
+    echo "  ↳ $file"
+    entry_payload "$file" | sed 's/^/    /'
+  done
+}
+
+cmd_stat() {
+  if [ ! -d "$LEARNED_DIR" ]; then
+    echo "NO ENTRIES"
+    return 0
+  fi
+  local entries bytes idxlines tokens
+  entries=$(find "$LEARNED_DIR" -maxdepth 1 -type f -name '*.md' ! -name 'INDEX.md' | wc -l | tr -d ' ')
+  bytes=$(find "$LEARNED_DIR" -maxdepth 1 -type f -name '*.md' ! -name 'INDEX.md' -exec cat {} + 2>/dev/null | wc -c | tr -d ' ')
+  idxlines=0
+  if [ -f "$INDEX" ]; then idxlines=$(grep -c '^- ' "$INDEX" 2>/dev/null || true); fi
+  tokens=$(( bytes / 4 ))
+  echo "── lore stat: $LEARNED_DIR ──"
+  printf 'entries:     %s\n' "$entries"
+  printf 'index lines: %s\n' "${idxlines:-0}"
+  printf 'total bytes: %s\n' "$bytes"
+  printf '~tokens:     %s  (bytes/4 estimate)\n' "$tokens"
+}
+
+main() {
+  local cmd="${1:-help}"
+  [ $# -gt 0 ] && shift
+  case "$cmd" in
+    recall)         cmd_recall "$@" ;;
+    stat)           cmd_stat "$@" ;;
+    help|-h|--help) usage ;;
+    *)              echo "lore: unknown command '$cmd'" >&2; usage >&2; return 2 ;;
+  esac
+}
+
+main "$@"

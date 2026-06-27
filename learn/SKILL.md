@@ -98,21 +98,35 @@ Print: `SAVED — ~/.claude/learned/YYYY-MM-DD-<slug>.md`
 **Goal**: Surface the 2–3 most relevant past lessons before work begins. Fast — read
 the index first, only open full entries that look relevant.
 
-### Step 1 — Scan the index
+### Step 1 — Get ranked candidates
+
+Prefer `lore` (a readable bash script shipped alongside this skill, run via `bash` — not
+a self-executing binary) — it ranks entries index-first and prints their distilled
+`## Lessons`, so recall stays token-cheap as the store grows (the index scan happens in
+the shell, not in context). Fall back to the raw index if it's absent.
 
 ```bash
-cat ~/.claude/learned/INDEX.md 2>/dev/null || echo "NO_ENTRIES"
+LORE="$(command -v lore || echo "$HOME/.claude/skills/learn/lore")"
+if [ -r "$LORE" ]; then
+  bash "$LORE" recall <description> -n 3   # ranked entries + distilled lessons
+else
+  cat ~/.claude/learned/INDEX.md 2>/dev/null || echo "NO_ENTRIES"
+fi
 ```
 
-If `NO_ENTRIES`: print `NO PAST EXPERIENCE — first run of this type.` and stop.
+If the output is `NO ENTRIES` / `NO_ENTRIES`: print
+`NO PAST EXPERIENCE — first run of this type.` and stop.
 
 ### Step 2 — Match relevant entries
 
-Read the index lines. For each, ask: *"Does this entry's domain, tags, or summary
-overlap with what we're about to build?"* Look for: same tech stack, same problem
-domain, same architectural pattern, same kind of risk.
-
-Select the top 2–3 matches. Read their full entry files.
+- **If `lore` ran**: its output is already the top matches with their lessons inline.
+  Skim them, discard any with no real overlap, and open a full entry file only when a
+  match looks relevant but the printed lessons aren't enough — usually no file open is
+  needed.
+- **If you used the raw index** (fallback): read the index lines and for each ask
+  *"Does this entry's domain, tags, or summary overlap with what we're about to build?"*
+  — same tech stack, problem domain, architectural pattern, or kind of risk. Select the
+  top 2–3 and read their full entry files.
 
 ### Step 3 — Output
 
